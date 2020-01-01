@@ -3,7 +3,7 @@
 __version__ = '0.5.0'
 __status__ = 'Beta'
 __author__ = 'Libor Gabaj'
-__copyright__ = 'Copyright 2018-2019, ' + __author__
+__copyright__ = 'Copyright 2018-2020, ' + __author__
 __credits__ = []
 __license__ = 'MIT'
 __maintainer__ = __author__
@@ -13,14 +13,15 @@ __email__ = 'libor.gabaj@gmail.com'
 import logging
 try:
     import configparser
-except Exception:
+except ModuleNotFoundError:
     from six.moves import configparser
+from typing import List
 
 
 ###############################################################################
 # Classes
 ###############################################################################
-class Config(object):
+class Config():
     """Create a manager for a configuration INI file.
 
     Arguments
@@ -45,7 +46,7 @@ class Config(object):
             self._file = file
             self._parser.read(file)
         else:
-            self._parser.readfp(file)
+            self._parser.read_file(file)
             self._file = file.name
         # Logging
         self._logger = logging.getLogger(' '.join([__name__, __version__]))
@@ -54,14 +55,14 @@ class Config(object):
             self.__class__.__name__, str(self)
             )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Represent instance object as a string."""
         msg = \
             f'ConfigFile(' \
             f'{self.configfile})'
         return msg
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Represent instance object officially."""
         msg = \
             f'{self.__class__.__name__}(' \
@@ -74,8 +75,8 @@ class Config(object):
         return self._file
 
     @property
-    def content(self):
-        """String with configuration parameters in form of INI file.
+    def content(self) -> str:
+        """Configuration parameters in form of INI file.
 
         Notes
         -----
@@ -91,54 +92,56 @@ class Config(object):
         content += pattern.format('EOF')
         return content
 
-    def option(self, option, section, default=None):
+    def option(self, option: str, section: str, default: str = None) -> str:
         """Read configuration option's value.
 
         Arguments
         ---------
-        option : str
+        option
             Configuration file option to be read.
             *The argument is mandatory and has no default value.*
-        section : str
+        section
             Configuration file section where to search the option.
             *The argument is mandatory and has no default value.*
-        default : str
+        default
             Default option value, if configuration file has neither
             the option nor the section.
 
         Returns
         -------
-        str
-            Configuration option value or default one.
+        Configuration option value or default one.
 
         """
         if not self._parser.has_option(section, option):
             return default
         return self._parser.get(section, option) or default
 
-    def option_split(self, option, section, appendix=[], separator=','):
+    def option_split(self,
+                     option: str,
+                     section: str,
+                     appendix: List[str] = None,
+                     separator: str = ',') -> List[str]:
         """Read configuration option, append to it, and split its value.
 
         Arguments
         ---------
-        option : str
+        option
             Configuration file option to be read.
             *The argument is mandatory and has no default value.*
-        section : str
+        section
             Configuration file section where to search the option.
             *The argument is mandatory and has no default value.*
-        appendix : list
+        appendix
             List of additonal option value parts that should be added
             to the read option for splitting purposes.
-        separator : str
+        separator
             String used as a separator for spliting the option. It is used
             for glueing appendix list members with read option and at the same
             time for splitting the entire, composed option value.
 
         Returns
         -------
-        list of str
-            List of a configuration option parts.
+        List of a configuration option parts.
 
         """
         # Read option
@@ -162,19 +165,18 @@ class Config(object):
             result.append(value)
         return result
 
-    def options(self, section):
+    def options(self, section: str) -> List[str]:
         """Read list of options in a section.
 
         Arguments
         ---------
-        section : str
+        section
             Configuration section to be read from.
             *The argument is mandatory and has no default value.*
 
         Returns
         -------
-        list of str
-            List of configuration option names.
+        List of configuration option names.
 
         """
         options = []
