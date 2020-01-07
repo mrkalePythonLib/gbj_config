@@ -49,48 +49,28 @@ class Config():
             self._parser.read_file(file)
             self._file = file.name
         # Logging
+        log = f'Instance of "{self.__class__.__name__}" created: {self}'
         self._logger = logging.getLogger(' '.join([__name__, __version__]))
-        self._logger.debug(
-            'Instance of %s created: %s',
-            self.__class__.__name__, str(self)
-            )
+        self._logger.debug(log)
 
     def __str__(self) -> str:
         """Represent instance object as a string."""
-        msg = \
+        log = \
             f'ConfigFile(' \
             f'{self.configfile})'
-        return msg
+        return log
 
     def __repr__(self) -> str:
         """Represent instance object officially."""
-        msg = \
+        log = \
             f'{self.__class__.__name__}(' \
             f'file={repr(self.configfile)})'
-        return msg
+        return log
 
     @property
     def configfile(self):
         """Configuration INI file."""
         return self._file
-
-    @property
-    def content(self) -> str:
-        """Configuration parameters in form of INI file.
-
-        Notes
-        -----
-        All section and options are listed including from ``DEFAULT`` section.
-
-        """
-        pattern = '\n\n---CONGIGURATION - {}---'
-        content = pattern.format('BOF')
-        for section in self._parser.sections():
-            content += '\n\n[{}]'.format(section)
-            for name, value in self._parser.items(section):
-                content += '\n{} = {}'.format(name, value)
-        content += pattern.format('EOF')
-        return content
 
     def option(self, option: str, section: str, default: str = None) -> str:
         """Read configuration option's value.
